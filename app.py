@@ -171,8 +171,14 @@ if not ensure_knowledge_base():
 
 if not config.GROQ_API_KEY:
     st.error(
-        "`GROQ_API_KEY` is not set. Copy `.env.example` to `.env` and add your "
-        "key from https://console.groq.com/keys, then restart the app."
+        "`GROQ_API_KEY` is not set. Get a key from "
+        "https://console.groq.com/keys, then:\n\n"
+        "- **Streamlit Community Cloud** - open the app's "
+        "**Settings -> Secrets** and add "
+        "`GROQ_API_KEY = \"gsk_...\"`, then reboot the app. Note that `.env` "
+        "is gitignored, so editing it locally does not affect a deployment.\n"
+        "- **Running locally** - copy `.env.example` to `.env` and add the key "
+        "there, then restart."
     )
     st.stop()
 
