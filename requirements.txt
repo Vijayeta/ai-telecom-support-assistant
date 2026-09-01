@@ -1,0 +1,27 @@
+# RAG Telecom Customer Care Chatbot - Python 3.11+ (tested on 3.13)
+# Install into the project-local .venv only:
+#   uv venv .venv --python 3.13 && uv pip install -r requirements.txt
+#   (or) python -m venv .venv && .venv/Scripts/pip install -r requirements.txt
+
+# --- LangChain core + LCEL ---
+langchain>=0.3.27
+langchain-core>=0.3.75
+langchain-community>=0.3.27
+
+# --- Vector store ---
+chromadb>=1.0.0
+langchain-chroma>=0.2.4
+
+# --- Local embeddings (all-MiniLM-L6-v2, no external API) ---
+langchain-huggingface>=0.3.0
+sentence-transformers>=3.0.0
+
+# --- LLM provider ---
+langchain-groq>=0.3.0
+
+# --- Ingestion ---
+pypdf>=5.0.0
+
+# --- UI / CLI ---
+streamlit>=1.40.0
+python-dotenv>=1.0.1
