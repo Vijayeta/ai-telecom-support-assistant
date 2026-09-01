@@ -141,10 +141,31 @@ with st.sidebar:
 # --------------------------------------------------------------------------
 st.title("NovaCell Support Assistant")
 
-if not is_knowledge_base_ready():
+
+@st.cache_resource(show_spinner="First run: building the knowledge base...")
+def ensure_knowledge_base() -> bool:
+    """Build the Chroma store once per container if it is missing.
+
+    `chroma_store/` is deliberately gitignored, so a fresh deployment (Streamlit
+    Community Cloud, or any new clone) starts with no vectors while the source
+    files in `data/` are committed. Ingesting on first boot keeps the binary
+    store out of the repo without leaving the deployed app dead on arrival.
+    A local run that has already ingested skips straight through.
+    """
+    if is_knowledge_base_ready():
+        return True
+
+    import ingest_all
+
+    ingest_all.main()
+    return is_knowledge_base_ready()
+
+
+if not ensure_knowledge_base():
     st.error(
-        "The knowledge base is empty. Build it first:\n\n"
-        "```\npython ingest_all.py\n```"
+        "The knowledge base could not be built. Check that `data/faq.csv`, "
+        "`data/tickets.db` and `data/telecom_guide.pdf` are present, or run "
+        "`python ingest_all.py` locally."
     )
     st.stop()
 

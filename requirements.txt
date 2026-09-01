@@ -13,6 +13,12 @@ chromadb>=1.0.0
 langchain-chroma>=0.2.4
 
 # --- Local embeddings (all-MiniLM-L6-v2, no external API) ---
+# torch must come from the CPU index: on Linux the default PyPI wheel is the
+# CUDA build and drags in several GB of nvidia-* packages, which blows the
+# Streamlit Community Cloud resource limit. The +cpu local version sorts above
+# the plain one, so pip prefers it. Harmless on Windows/macOS.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch>=2.0.0
 langchain-huggingface>=0.3.0
 sentence-transformers>=3.0.0
 
