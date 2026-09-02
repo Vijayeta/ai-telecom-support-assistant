@@ -47,6 +47,14 @@ GUIDES_COLLECTION = "guides"
 
 TOP_K = int(os.getenv("TOP_K", "3"))                # FR-07: top-3 per collection
 
+# Minimum relevance for a retrieved document to reach the prompt. Chroma's l2
+# relevance function maps our normalised embeddings to roughly [-0.41, 1].
+# Measured against this knowledge base: in-domain questions score 0.46-0.74 at
+# best, while off-topic ones never exceed -0.19, so 0.10 sits in the gap with
+# margin on both sides. Below it, retrieval returns nothing and the prompt's
+# "no context" path produces a refusal instead of an answer built on noise.
+RELEVANCE_THRESHOLD = float(os.getenv("RELEVANCE_THRESHOLD", "0.10"))
+
 # --------------------------------------------------------------------------
 # PDF chunking (FR-16)
 # --------------------------------------------------------------------------

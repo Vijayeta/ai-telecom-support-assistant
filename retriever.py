@@ -1,8 +1,11 @@
 """Merged retriever across the three knowledge collections (FR-06 - FR-08).
 
 The three Chroma collections are queried in parallel, each returning its own
-top-3 (FR-07), and the 9 results are merged into one source-labelled context
+top-3 (FR-07), and the results are merged into one source-labelled context
 block (FR-08) that is injected into the prompt.
+
+Anything scoring below `config.RELEVANCE_THRESHOLD` is dropped first, so the
+merged block holds at most 9 documents and an off-topic question yields none.
 
 To add a knowledge source (NFR-06): write an `ingest_<source>.py` that writes a
 new collection, then append one `CollectionSpec` to COLLECTIONS below. Nothing
@@ -11,6 +14,7 @@ else in the app needs to change.
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass
 
 from langchain_core.documents import Document
@@ -18,6 +22,16 @@ from langchain_core.runnables import Runnable, RunnableLambda, RunnableParallel
 
 import config
 from vectorstore import collection_count, get_store
+
+# Chroma's l2 relevance function maps our normalised embeddings to roughly
+# [-0.41, 1], so LangChain warns on every query that scores fall outside [0, 1].
+# The scale is consistent, which is all a threshold needs. Filtered once at
+# import rather than per call: RunnableParallel runs the collection branches in
+# threads, and `warnings.catch_warnings()` swaps a global, so one branch leaving
+# the block would restore the warning underneath the others mid-query.
+warnings.filterwarnings(
+    "ignore", message="Relevance scores must be between", category=UserWarning
+)
 
 
 @dataclass(frozen=True)
@@ -58,15 +72,45 @@ def is_knowledge_base_ready() -> bool:
     return all(count > 0 for _, count in knowledge_base_status())
 
 
-def build_merged_retriever(k: int = config.TOP_K) -> Runnable[str, list[Document]]:
-    """Question -> up to `k` documents from each registered collection.
+def _scored_search(
+    spec: CollectionSpec, k: int, threshold: float
+) -> Runnable[str, list[Document]]:
+    """One collection's top-`k`, dropping anything below `threshold`.
+
+    Without the threshold every question retrieved a full `k` documents per
+    collection whatever it asked about, so an off-topic question still arrived
+    at the prompt wrapped in nine irrelevant telecom chunks and the refusal
+    rested entirely on the model's judgement. Filtering on relevance makes the
+    refusal structural: nothing clears the bar, `format_context` reports no
+    context, and the answer cannot be built on noise.
+    """
+    store = get_store(spec.name)
+
+    def run(question: str) -> list[Document]:
+        scored = store.similarity_search_with_relevance_scores(question, k=k)
+
+        kept = []
+        for document, score in scored:
+            if score < threshold:
+                continue
+            document.metadata["relevance"] = round(float(score), 3)
+            kept.append(document)
+        return kept
+
+    return RunnableLambda(run)
+
+
+def build_merged_retriever(
+    k: int = config.TOP_K, threshold: float = config.RELEVANCE_THRESHOLD
+) -> Runnable[str, list[Document]]:
+    """Question -> up to `k` sufficiently relevant documents per collection.
 
     Branches of a RunnableParallel are executed concurrently, so total
     retrieval latency is roughly that of the slowest collection rather than
     the sum of all three (NFR-01).
     """
     branches = {
-        spec.name: get_store(spec.name).as_retriever(search_kwargs={"k": k})
+        spec.name: _scored_search(spec, k=k, threshold=threshold)
         for spec in COLLECTIONS
     }
 
