@@ -64,6 +64,7 @@ def build_llm() -> ChatGroq:
         api_key=config.require_api_key(),
         temperature=config.LLM_TEMPERATURE,
         reasoning_effort=config.REASONING_EFFORT,
+        max_tokens=config.MAX_TOKENS,
     )
 
 

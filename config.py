@@ -88,6 +88,7 @@ GROQ_API_KEY = _read_secret("GROQ_API_KEY")
 GROQ_MODEL = os.getenv("GROQ_MODEL", "qwen/qwen3.8-27b")
 LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0"))
 REASONING_EFFORT = os.getenv("REASONING_EFFORT", "none")
+MAX_TOKENS = int(os.getenv("MAX_TOKENS", "512"))  # keeps each request under Groq free-tier OTPM
 
 # --------------------------------------------------------------------------
 # Escalation copy (FR-11) - kept in one place so support ops can reword it

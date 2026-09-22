@@ -158,5 +158,6 @@ All optional, via `.env` (see `.env.example`):
 | `GROQ_MODEL` | `qwen/qwen3.8-27b` |
 | `LLM_TEMPERATURE` | `0` |
 | `REASONING_EFFORT` | `none` |
+| `MAX_TOKENS` | `512` |
 | `EMBEDDING_MODEL` | `sentence-transformers/all-MiniLM-L6-v2` |
 | `TOP_K` | `3` (per collection) |
