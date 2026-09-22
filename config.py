@@ -85,7 +85,7 @@ def _read_secret(name: str, default: str = "") -> str:
 
 
 GROQ_API_KEY = _read_secret("GROQ_API_KEY")
-GROQ_MODEL = os.getenv("GROQ_MODEL", "qwen/qwen3.6-27b")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "qwen/qwen3.8-27b")
 LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0"))
 REASONING_EFFORT = os.getenv("REASONING_EFFORT", "none")
 

@@ -34,7 +34,7 @@ StrOutputParser → streamed to the UI
 |---|---|
 | Embeddings | `sentence-transformers/all-MiniLM-L6-v2`, **local** — no embedding API cost |
 | Vector store | ChromaDB, persisted to `chroma_store/` |
-| LLM | `qwen/qwen3.6-27b` via the Groq API |
+| LLM | `qwen/qwen3.8-27b` via the Groq API |
 | Framework | LangChain (LCEL) |
 | UI | Streamlit + a CLI REPL |
 
@@ -155,7 +155,7 @@ All optional, via `.env` (see `.env.example`):
 | Variable | Default |
 |---|---|
 | `GROQ_API_KEY` | *(required)* |
-| `GROQ_MODEL` | `qwen/qwen3.6-27b` |
+| `GROQ_MODEL` | `qwen/qwen3.8-27b` |
 | `LLM_TEMPERATURE` | `0` |
 | `REASONING_EFFORT` | `none` |
 | `EMBEDDING_MODEL` | `sentence-transformers/all-MiniLM-L6-v2` |
